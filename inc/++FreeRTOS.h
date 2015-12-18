@@ -23,5 +23,11 @@ namespace FreeRTOS {
             return Task(handler);
         }
     };
+
+    namespace context {
+        void delay(uint32_t ticks) {
+            vTaskDelay(ticks);
+        }
+    }
 }
 #endif //BASIC_FREERTOS_H

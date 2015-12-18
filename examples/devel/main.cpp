@@ -38,13 +38,14 @@ struct data {
 };
 
 void TaskSend(data * val) {
+    using namespace FreeRTOS::context;
     int i = 0;
     while(true) {
         i++;
         val->a = i;
         val->b = i+1;
         xSemaphoreGive(smphr);
-        vTaskDelay(100);
+        delay(100);
     }
 }
 
