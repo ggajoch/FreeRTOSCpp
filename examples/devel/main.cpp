@@ -58,6 +58,7 @@ void TaskGet(data * val) {
 
 int main() {
     using namespace FreeRTOS;
+    using namespace control;
 
     queue = xQueueCreate(1000, sizeof(float));
     smphr = xSemaphoreCreateBinary();
@@ -69,6 +70,6 @@ int main() {
     Task::create(TaskSend, "s", 128, 1, &d);
     Task::create(TaskGet, "r", 128, 1, &d);
 
-    vTaskStartScheduler();
+    startScheduler();
     return 0;
 }

@@ -29,5 +29,11 @@ namespace FreeRTOS {
             vTaskDelay(ticks);
         }
     }
+
+    namespace control {
+        void startScheduler() {
+            vTaskStartScheduler();
+        }
+    }
 }
 #endif //BASIC_FREERTOS_H
