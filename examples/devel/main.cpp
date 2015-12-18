@@ -26,7 +26,7 @@ void RxTask(void *pvParameters) {
     }
 }
 
-FreeRTOS::Semaphore * smphr = nullptr;
+FreeRTOS::Semaphore smphr;
 struct data {
     int a, b;
 };
@@ -38,14 +38,14 @@ void TaskSend(data * val) {
         i++;
         val->a = i;
         val->b = i+1;
-        smphr->give();
+        smphr.give();
         delay(100);
     }
 }
 
 void TaskGet(data * val) {
     while(true) {
-        smphr->take();
+        smphr.take();
         printf("got: %d %d\n", val->a, val->b);
     }
 }
@@ -55,8 +55,8 @@ int main() {
     using namespace control;
 
 //    queue = xQueueCreate(1000, sizeof(float));
-    Semaphore handle = Semaphore::createBinary();
-    smphr = &handle;
+//    Semaphore handle = Semaphore::createBinary();
+//    smphr = &handle;
 
     Task first = Task::create<void>(RxTask, "Rx", 128, 1);
     Task::create(TxTask, "Tx", 128, 1);

@@ -29,17 +29,11 @@ namespace FreeRTOS {
     };
 
 
-    class Semaphore {
+    class SemaphoreGeneric {
+    protected:
         xSemaphoreHandle handle;
-        Semaphore(xSemaphoreHandle handle) : handle(handle) {
-        }
+        SemaphoreGeneric() {}
     public:
-        static Semaphore createBinary() {
-            xSemaphoreHandle handler;
-            handler = xSemaphoreCreateBinary();
-            return Semaphore(handler);
-        }
-
         void take(uint32_t timeToWait = portMAX_DELAY) {
             xSemaphoreTake(this->handle, timeToWait);
         }
@@ -47,7 +41,40 @@ namespace FreeRTOS {
         void give() {
             xSemaphoreGive(this->handle);
         }
+
+        ~SemaphoreGeneric() {
+            vSemaphoreDelete(handle);
+        }
     };
+
+    class Semaphore : public SemaphoreGeneric {
+    public:
+        Semaphore() {
+            handle = xSemaphoreCreateBinary();
+        }
+    };
+
+    class CountingSemaphore : SemaphoreGeneric {
+    public:
+        CountingSemaphore(uint32_t maxCount = portMAX_DELAY, uint32_t initialCount = 0) {
+            handle = xSemaphoreCreateCounting(maxCount, initialCount);
+        }
+    };
+
+    class Mutex : SemaphoreGeneric {
+    public:
+        Mutex() {
+            handle = xSemaphoreCreateMutex();
+        }
+    };
+
+    class RecursiveMutex : SemaphoreGeneric {
+    public:
+        RecursiveMutex() {
+            handle = xSemaphoreCreateRecursiveMutex();
+        }
+    };
+
 
     template<typename T>
     class Queue {
@@ -59,6 +86,17 @@ namespace FreeRTOS {
         void send(const T& element, uint32_t timeToWait = portMAX_DELAY) {
             xQueueSend(handle, &element, timeToWait);
         }
+        void sendToBack(const T& element, uint32_t timeToWait = portMAX_DELAY) {
+            xQueueSendToBack(handle, &element, timeToWait);
+        }
+
+        void sendToFront(const T& element, uint32_t timeToWait = portMAX_DELAY) {
+            xQueueSendToFront(handle, &element, timeToWait);
+        }
+        bool peek(T * element, uint32_t timeToWait = portMAX_DELAY) {
+            return xQueuePeek(handle, element, timeToWait);
+        }
+
         bool receive(T * element, uint32_t timeToWait = portMAX_DELAY) {
             return xQueueReceive(handle, element, timeToWait);
         }
