@@ -1,9 +1,12 @@
 #ifndef BASIC_FREERTOS_H
 #define BASIC_FREERTOS_H
 
+
+
 extern "C" {
 #include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
 }
 
 namespace FreeRTOS {
@@ -21,6 +24,27 @@ namespace FreeRTOS {
             TaskHandle_t handler;
             xTaskCreate(castedTask, name, stackDepth, castedParamter, priority, &handler);
             return Task(handler);
+        }
+    };
+
+
+    class Semaphore {
+        xSemaphoreHandle handle;
+        Semaphore(xSemaphoreHandle handle) : handle(handle) {
+        }
+    public:
+        static Semaphore createBinary() {
+            xSemaphoreHandle handler;
+            handler = xSemaphoreCreateBinary();
+            return Semaphore(handler);
+        }
+
+
+        void take(uint32_t timeToWait = portMAX_DELAY) {
+            xSemaphoreTake(this->handle, timeToWait);
+        }
+        void give() {
+            xSemaphoreGive(this->handle);
         }
     };
 
