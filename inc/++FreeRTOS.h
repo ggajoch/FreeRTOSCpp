@@ -7,6 +7,7 @@ extern "C" {
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+#include "queue.h"
 }
 
 namespace FreeRTOS {
@@ -39,12 +40,27 @@ namespace FreeRTOS {
             return Semaphore(handler);
         }
 
-
         void take(uint32_t timeToWait = portMAX_DELAY) {
             xSemaphoreTake(this->handle, timeToWait);
         }
+
         void give() {
             xSemaphoreGive(this->handle);
+        }
+    };
+
+    template<typename T>
+    class Queue {
+        xQueueHandle handle;
+    public:
+        Queue(uint32_t length) {
+            handle = xQueueCreate(length, sizeof(T));
+        }
+        void send(const T& element, uint32_t timeToWait = portMAX_DELAY) {
+            xQueueSend(handle, &element, timeToWait);
+        }
+        bool receive(T * element, uint32_t timeToWait = portMAX_DELAY) {
+            return xQueueReceive(handle, element, timeToWait);
         }
     };
 

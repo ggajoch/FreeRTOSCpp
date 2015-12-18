@@ -1,23 +1,16 @@
 #include <cstdio>
 
-extern "C" {
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include <FreeRTOS/include/semphr.h>
-}
-
 #include "inc/++FreeRTOS.h"
 using namespace FreeRTOS;
 
-xQueueHandle queue;
+Queue<float> Q1(100);
 
 void TxTask(void *pvParameters) {
 
     float x = 0;
     while (true) {
         printf("sending %f...\n", x);
-        xQueueSend(queue, &x, portMAX_DELAY);
+        Q1.send(x);
         x += 0.1;
         vTaskDelay(1000); // 1 second
     }
@@ -27,7 +20,7 @@ void TxTask(void *pvParameters) {
 void RxTask(void *pvParameters) {
     while (true) {
         float received;
-        if (xQueueReceive(queue, &received, portMAX_DELAY) == pdTRUE) {
+        if ( Q1.receive(&received) ) {
             printf("received: %f\n", received);
         }
     }
@@ -61,7 +54,7 @@ int main() {
     using namespace FreeRTOS;
     using namespace control;
 
-    queue = xQueueCreate(1000, sizeof(float));
+//    queue = xQueueCreate(1000, sizeof(float));
     Semaphore handle = Semaphore::createBinary();
     smphr = &handle;
 
