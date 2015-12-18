@@ -17,7 +17,7 @@ file(GLOB Project
 )
 
 
-set(SOURCE_FILES ${Project} ${FreeRTOSSrc})
+set(SOURCE_FILES ${Project} ${FreeRTOSSrc} inc/++FreeRTOS.h)
 include_directories(. FreeRTOS/include FreeRTOS/portable ${Project})
 
 

@@ -1,9 +1,12 @@
 #include <cstdio>
 
+#include "inc/++FreeRTOS.h"
+
 extern "C" {
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include <FreeRTOS/include/semphr.h>
 }
 
 xQueueHandle queue;
@@ -29,11 +32,41 @@ void RxTask(void *pvParameters) {
     }
 }
 
-int main() {
-    queue = xQueueCreate(1000, sizeof(float));
+xSemaphoreHandle smphr;
+struct data {
+    int a, b;
+};
 
-    xTaskCreate(RxTask, "Rx", 1000, NULL, 1, NULL);
-    xTaskCreate(TxTask, "Tx", 1000, NULL, 1, NULL);
+void TaskSend(data * val) {
+    int i = 0;
+    while(true) {
+        i++;
+        val->a = i;
+        val->b = i+1;
+        xSemaphoreGive(smphr);
+        vTaskDelay(100);
+    }
+}
+
+void TaskGet(data * val) {
+    while(true) {
+        xSemaphoreTake(smphr, portMAX_DELAY);
+        printf("got: %d %d\n", val->a, val->b);
+    }
+}
+
+int main() {
+    using namespace FreeRTOS;
+
+    queue = xQueueCreate(1000, sizeof(float));
+    smphr = xSemaphoreCreateBinary();
+
+    Task first = Task::create<void>(RxTask, "Rx", 128, 1);
+    Task::create(TxTask, "Tx", 128, 1);
+
+    data d;
+    Task::create(TaskSend, "s", 128, 1, &d);
+    Task::create(TaskGet, "r", 128, 1, &d);
 
     vTaskStartScheduler();
     return 0;
