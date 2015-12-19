@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.3)
 project(basic)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c11")
 
 file(GLOB FreeRTOSSrc
         FreeRTOS/*.c
         FreeRTOS/include/*.h
-        FreeRTOS/portable/*.c
-        FreeRTOS/portable/*.h
+        FreeRTOS/portable/*
 )
 
 file(GLOB Project
@@ -17,12 +16,8 @@ file(GLOB Project
 )
 
 
-set(SOURCE_FILES ${Project} ${FreeRTOSSrc} inc/++FreeRTOS.h)
+set(SOURCE_FILES  ${Project} ${FreeRTOSSrc} inc/++FreeRTOS.h)
 include_directories(. FreeRTOS/include FreeRTOS/portable ${Project})
 
 
 add_executable(basic ${SOURCE_FILES})
-
-
-find_library(LIBWMM winmm)
-target_link_libraries(basic ${LIBWMM})

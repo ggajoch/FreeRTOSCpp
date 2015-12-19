@@ -26,6 +26,10 @@ namespace FreeRTOS {
             xTaskCreate(castedTask, name, stackDepth, castedParamter, priority, &handler);
             return Task(handler);
         }
+
+        ~Task(){
+            vTaskDelete(rtosTask);
+        }
     };
 
 
