@@ -131,6 +131,32 @@ namespace FreeRTOS {
             vTaskDelay(ticks);
         }
     }
+    namespace time {
+        enum TimeUnit {
+            milisecond,
+            second,
+            minute
+        };
+
+        template<int value, TimeUnit unit>
+        struct Time {
+            static uint32_t ticks;
+        };
+
+        template<int timeValue>
+        Time<timeValue, second>::ticks = ((timeValue * 1000) / portTICK_PERIOD_MS);
+
+        template<int timeValue>
+        Time<timeValue, milisecond>::ticks = ((timeValue) / portTICK_PERIOD_MS);
+
+        template<int timeValue>
+        Time<timeValue, minute>::ticks = ((timeValue * 1000 * 60) / portTICK_PERIOD_MS);
+
+        template<int timeValue, TimeUnit unit>
+        inline void delay(Time<timeValue, unit> t){
+            context::delay(Time<TimeUnit, unit>::ticks);
+        };
+    }
 
     namespace control {
         inline void startScheduler() {
