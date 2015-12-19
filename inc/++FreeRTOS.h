@@ -100,16 +100,40 @@ namespace FreeRTOS {
         bool receive(T * element, uint32_t timeToWait = portMAX_DELAY) {
             return xQueueReceive(handle, element, timeToWait);
         }
+
+        class IntertupInterface {
+            xQueueHandle handle;
+            IntertupInterface(Queue<T> * origin): handle(origin->handle){
+
+            }
+            friend class Queue<T>;
+        public:
+            BaseType_t sendToBack(const T& element){
+                BaseType_t needYield;
+                xQueueSendToBackFromISR(handle, &element, &needYield);
+                return needYield;
+            }
+
+            BaseType_t sendToFront(const T& element){
+                BaseType_t needYield;
+                xQueueSendToBackFromISR(handle, &element, &needYield);
+                return needYield;
+            }
+        };
+
+        IntertupInterface interruptView(){
+            return IntertupInterface(this);
+        }
     };
 
     namespace context {
-        void delay(uint32_t ticks) {
+        inline void delay(uint32_t ticks) {
             vTaskDelay(ticks);
         }
     }
 
     namespace control {
-        void startScheduler() {
+        inline void startScheduler() {
             vTaskStartScheduler();
         }
     }
