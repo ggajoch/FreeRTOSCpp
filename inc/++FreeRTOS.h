@@ -19,7 +19,7 @@ namespace FreeRTOS {
 
     public:
         template<typename T>
-        static Task create(void (*task)(T *), char * name, uint32_t stackDepth, uint8_t priority, T * param = NULL) {
+        static Task create(void (*task)(T *),const char * name, uint32_t stackDepth, uint8_t priority, T * param = NULL) {
             void (*castedTask)(void *) = reinterpret_cast<void (*)(void *)>(task);
             void (*castedParamter) = static_cast<void *>(&param);
             TaskHandle_t handler;
@@ -31,8 +31,8 @@ namespace FreeRTOS {
 
     class SemaphoreGeneric {
     protected:
-        xSemaphoreHandle handle;
-        SemaphoreGeneric() {}
+        const xSemaphoreHandle handle;
+        SemaphoreGeneric(xSemaphoreHandle handle): handle(handle) {}
     public:
         void take(uint32_t timeToWait = portMAX_DELAY) {
             xSemaphoreTake(this->handle, timeToWait);
@@ -49,29 +49,25 @@ namespace FreeRTOS {
 
     class Semaphore : public SemaphoreGeneric {
     public:
-        Semaphore() {
-            handle = xSemaphoreCreateBinary();
+        Semaphore() : SemaphoreGeneric(xSemaphoreCreateBinary()) {
         }
     };
 
     class CountingSemaphore : SemaphoreGeneric {
     public:
-        CountingSemaphore(uint32_t maxCount = portMAX_DELAY, uint32_t initialCount = 0) {
-            handle = xSemaphoreCreateCounting(maxCount, initialCount);
+        CountingSemaphore(uint32_t maxCount = portMAX_DELAY, uint32_t initialCount = 0) : SemaphoreGeneric(xSemaphoreCreateCounting(maxCount, initialCount)){
         }
     };
 
     class Mutex : SemaphoreGeneric {
     public:
-        Mutex() {
-            handle = xSemaphoreCreateMutex();
+        Mutex() : SemaphoreGeneric(xSemaphoreCreateMutex()) {
         }
     };
 
     class RecursiveMutex : SemaphoreGeneric {
     public:
-        RecursiveMutex() {
-            handle = xSemaphoreCreateRecursiveMutex();
+        RecursiveMutex() : SemaphoreGeneric(xSemaphoreCreateRecursiveMutex()) {
         }
     };
 
